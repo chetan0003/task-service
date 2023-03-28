@@ -6,14 +6,15 @@ import com.task.model.Holiday;
 import com.task.model.Response;
 import com.task.repository.HolidayRepository;
 import com.task.service.HolidayService;
-import com.task.util.TaskUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class HolidayServiceImpl implements HolidayService {
@@ -21,10 +22,13 @@ public class HolidayServiceImpl implements HolidayService {
     private final HolidayRepository holidayRepository;
     @Override
     public Response createHoliday(Holiday holiday) {
+        if(holiday.getDate() != null && holiday.getDate().contains("T")) {
+            return Response.builder().statusCode(HttpStatus.UNPROCESSABLE_ENTITY.value()).message("Please enter date..!").build();
+        }
         UserDetail userDetail =UserDetail.builder().id(holiday.getUserId()).build();
         HolidayDetail holidayDetail = HolidayDetail.builder().name(holiday.getName()).date(holiday.getDate()).userDetail(userDetail).build();
         HolidayDetail holidayDetail1 = this.holidayRepository.save(holidayDetail);
-        return Response.builder().statusCode(201).data(holidayDetail1).build();
+        return Response.builder().statusCode(HttpStatus.CREATED.value()).data(holidayDetail1).build();
     }
 
     @Override
@@ -32,7 +36,7 @@ public class HolidayServiceImpl implements HolidayService {
         UserDetail userDetail = UserDetail.builder().id(holiday.getUserId()).build();
         HolidayDetail holidayDetail = HolidayDetail.builder().id(holiday.getId()).name(holiday.getName()).date(holiday.getDate()).userDetail(userDetail).build();
         HolidayDetail holidayDetail1 = this.holidayRepository.save(holidayDetail);
-        return Response.builder().statusCode(201).data(holidayDetail1).build();
+        return Response.builder().statusCode(HttpStatus.OK.value()).data(holidayDetail1).build();
     }
 
     @Override
@@ -41,19 +45,19 @@ public class HolidayServiceImpl implements HolidayService {
        Optional<HolidayDetail> holidayDetail =  this.holidayRepository.findById(holidayId);
        if (holidayDetail.isPresent())
            holidayDetail1 = holidayDetail.get();
-        return Response.builder().statusCode(200).data(holidayDetail1).build();
+        return Response.builder().statusCode(HttpStatus.OK.value()).data(holidayDetail1).build();
     }
 
     @Override
     public Response getAllHolidays(Integer userId) {
         List<HolidayDetail> holidayDetailList = this.holidayRepository.findAllByUserId(userId);
-        return Response.builder().statusCode(200).data(holidayDetailList).build();
+        return Response.builder().statusCode(HttpStatus.OK.value()).data(holidayDetailList).build();
     }
 
     @Override
     public Response deleteHoliday(Integer holidayId) {
         HolidayDetail holidayDetail = HolidayDetail.builder().id(holidayId).build();
         this.holidayRepository.delete(holidayDetail);
-        return Response.builder().statusCode(200).build();
+        return Response.builder().statusCode(HttpStatus.OK.value()).build();
     }
 }

@@ -8,6 +8,7 @@ import com.task.service.TaskService;
 import com.task.util.TaskUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
@@ -23,6 +24,9 @@ public class TaskServiceImpl implements TaskService {
     private final HolidayRepository holidayRepository;
     @Override
     public Response getCalculateEndDate(Task task) {
+        if(task.getStartDate() != null && task.getStartDate().contains("T")) {
+           return Response.builder().statusCode(HttpStatus.UNPROCESSABLE_ENTITY.value()).message("Please enter date..!").build();
+        }
         List<HolidayDetail> holidayDetailList = holidayRepository.findAll();
         // Calculate the end date by adding the duration to the start date, skipping weekends and holidays
         Integer durationInDays = task.getDays();
@@ -36,7 +40,7 @@ public class TaskServiceImpl implements TaskService {
         }
         log.info(task.getStartDate() + " " + task.getDays());
         log.info("end Date " + endDate);
-        return Response.builder().statusCode(200).data(TaskUtil.getStringDateFromLocalDate(endDate)).build();
+        return Response.builder().statusCode(HttpStatus.OK.value()).data(TaskUtil.getStringDateFromLocalDate(endDate)).build();
     }
 
     Boolean checkHoliday(List<HolidayDetail> holidayDetailList, LocalDate endDate) {

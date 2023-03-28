@@ -7,6 +7,7 @@ import com.task.service.UserService;
 import com.task.util.CustomPasswordEncoder;
 import com.task.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -53,7 +54,7 @@ public class AuthenticateController {
             user.setPassword(null);
             user.setToken(token);
             user.setId(userVO2.getId());
-            return Response.builder().statusCode(200).data(user).build();
+            return Response.builder().statusCode(HttpStatus.OK.value()).data(user).build();
         } else {
             return Response.builder().statusCode(401).message("User is not authorize,please check user name and password").build();
         }
